@@ -126,6 +126,12 @@ class Connection:
         self.associate_id = response["id"]
         return True
 
+    def _default_key(self):
+        return dict(
+            id = self.associate_id,
+            key = base64.b64encode(self.id_public_key._public_key).decode("utf-8")
+        )
+
     def load_associate(self, name, public_key):
         self.associate_id = name
         self.id_public_key = PublicKey(public_key)
@@ -133,27 +139,20 @@ class Connection:
     def dump_associate(self):
         return (self.associate_id, self.id_public_key._public_key)
 
-    def test_associate(self, trigger_unlock = False):
+    def test_associate(self, trigger_unlock = False, key = None):
         msg = {
-            "action": "test-associate",
-            "id": self.associate_id,
-            "key": base64.b64encode(self.id_public_key._public_key).decode("utf-8")
-        }
+            "action": "test-associate"
+        } | (key or self._default_key())
 
         self.send_encrypted_message(msg, trigger_unlock)
         self.get_encrypted_response()
         return True
 
-    def get_logins(self, url):
+    def get_logins(self, url, keys = None):
         msg = {
             "action": "get-logins",
             "url": url,
-            "keys": [
-                {
-                    "id": self.associate_id,
-                    "key": base64.b64encode(self.id_public_key._public_key).decode("utf-8")
-                }
-            ]
+            "keys": keys or [self._default_key()]
         }
 
         self.send_encrypted_message(msg)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "keepassxc-proxy-client"
-version = "0.1.7"
+version = "0.1.7pl1"
 description = "A client (library + CLI) for KeePassXC's Browser Integration protocol."
 readme = "README.md"
 license = "0BSD"
@@ -12,6 +12,7 @@ requires-python = ">=3.9"
 authors = [
     { name = "Henrik Boeving", email = "hargonix@gmail.com" },
     { name = "Marek Rost", email = "marek.rost@gmail.com" },
+    { name = "Ulrich Schwarz", email = "brotherelf@gmx.nte" },
 ]
 keywords = ["keepassxc", "keepass", "browser-integration", "secrets", "cli"]
 classifiers = [
