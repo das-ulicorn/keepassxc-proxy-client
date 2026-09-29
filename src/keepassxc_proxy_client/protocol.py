@@ -205,10 +205,16 @@ class Connection:
                 break
         return json.loads(''.join(data))
 
-    def get_encrypted_response(self):
+    def get_encrypted_response(self, drop_informational=True):
         raw_response = self.get_unencrypted_response()
         if "error" in raw_response:
             raise ResponseUnsuccesfulException(raw_response)
+        if not 'message' in raw_response and not 'nonce' in raw_response:
+            # these are those annoying 'databse-unlocked' messages, I guess?
+            if drop_informational:
+                return self.get_encrypted_response(drop_informational)
+            else:
+                return raw_response
         server_nonce = base64.b64decode(raw_response["nonce"])
         decrypted = self.box.decrypt(base64.b64decode(raw_response["message"]), server_nonce)
         response = json.loads(decrypted)
