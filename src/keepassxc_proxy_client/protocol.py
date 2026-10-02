@@ -67,6 +67,7 @@ class Connection:
             self.socket = WinNamedPipe(win32file.GENERIC_READ | win32file.GENERIC_WRITE, win32file.OPEN_EXISTING)
         else:
             self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.socket.settimeout(1)
 
         self.replystream = None
             
@@ -205,7 +206,10 @@ class Connection:
         decoder = json.JSONDecoder()
         while True:
             while True:
-                new_data = self.socket.recv(4096)
+                try:
+                    new_data = self.socket.recv(4096)
+                except TimeoutError:
+                    break
                 if new_data:
                     data += new_data.decode('utf-8')
                 else:
@@ -223,6 +227,7 @@ class Connection:
 
     def get_encrypted_response(self, drop_informational=True):
         raw_response = self.get_unencrypted_response()
+        # print("<<< "+str(raw_response))
         if "error" in raw_response:
             raise ResponseUnsuccesfulException(raw_response)
         if not 'message' in raw_response and not 'nonce' in raw_response:
@@ -248,5 +253,6 @@ class Connection:
         }
         if (trigger_unlock):
             msg['triggerUnlock'] = 'true'
+        # print(">>> "+str(msg))
         self.socket.sendall(json.dumps(msg).encode("utf-8"))
         self.nonce = (int.from_bytes(self.nonce, "big") + 1).to_bytes(24, "big")
