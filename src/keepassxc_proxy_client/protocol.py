@@ -67,6 +67,8 @@ class Connection:
             self.socket = WinNamedPipe(win32file.GENERIC_READ | win32file.GENERIC_WRITE, win32file.OPEN_EXISTING)
         else:
             self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        self.replystream = None
             
     def connect(self, path=None):
         if path is None:
@@ -194,7 +196,9 @@ class Connection:
         return response
 
     def get_unencrypted_response(self):
-        return next(self._get_unencrypted_response())
+        if self.replystream is None:
+            self.replystream = self._get_unencrypted_response()
+        return next(self.replystream)
 
     def _get_unencrypted_response(self):
         data = ""
