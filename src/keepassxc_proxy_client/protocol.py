@@ -194,6 +194,9 @@ class Connection:
         return response
 
     def get_unencrypted_response(self):
+        return next(self._get_unencrypted_response())
+
+    def _get_unencrypted_response(self):
         data = ""
         decoder = json.JSONDecoder()
         while True:
